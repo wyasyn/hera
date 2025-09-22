@@ -1,5 +1,5 @@
-import React from "react";
+import HeroWrapper from "./hero-wrapper";
 
 export default function Hero() {
-  return <section>Hero</section>;
+  return <HeroWrapper>Hero</HeroWrapper>;
 }

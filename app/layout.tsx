@@ -26,9 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${outfit.variable} ${playFair.variable} antialiased no-scrollbar`}
-      >
+      <body className={`${outfit.variable} ${playFair.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

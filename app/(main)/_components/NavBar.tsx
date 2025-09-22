@@ -15,6 +15,7 @@ import {
   IconSun,
   IconMoon,
   IconBrandX,
+  IconDotsVertical,
 } from "@tabler/icons-react";
 
 import {
@@ -89,10 +90,12 @@ export default function NavBar() {
   const { theme, setTheme } = useTheme();
 
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [selected, setSelected] = useState(
     navLinks.find((l) => l.href === pathname) || navLinks[0]
@@ -115,7 +118,7 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  // Close dropdown when clicking outside
+  // Close nav dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -132,9 +135,24 @@ export default function NavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  // Close dropdown on route change
+  // Close socials dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  // Close dropdowns on route change
   useEffect(() => {
     setOpen(false);
+    setMenuOpen(false);
     setSelected(navLinks.find((l) => l.href === pathname) || navLinks[0]);
   }, [pathname]);
 
@@ -152,9 +170,8 @@ export default function NavBar() {
       className={cn(
         "fixed top-4 left-1/2 -translate-x-1/2 z-50",
         "flex items-center gap-6 px-6 py-3 rounded-full",
-        "bg-card/80 backdrop-blur-xl",
-        "border border-border/50",
-        "shadow-lg",
+        "bg-card/50 backdrop-blur-sm",
+        "border border-border/50 shadow-lg",
         "transition-all duration-300"
       )}
       style={{
@@ -162,7 +179,7 @@ export default function NavBar() {
         WebkitBackdropFilter: "blur(20px)",
       }}
     >
-      {/* Left dropdown */}
+      {/* Left dropdown (nav links) */}
       <div className="relative" ref={dropdownRef}>
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -171,10 +188,8 @@ export default function NavBar() {
           className={cn(
             "flex items-center gap-2 px-4 py-2.5 rounded-full",
             "bg-muted/50 hover:bg-muted/80",
-            "text-foreground",
-            "transition-all duration-200",
-            "border border-border/30",
-            "shadow-sm shadow-black/5"
+            "text-foreground transition-all duration-200",
+            "border border-border/30 shadow-sm shadow-black/5"
           )}
           aria-label={`Navigate to ${selected.label}`}
           aria-expanded={open}
@@ -194,7 +209,7 @@ export default function NavBar() {
           </motion.span>
         </motion.button>
 
-        {/* Dropdown menu */}
+        {/* Nav dropdown menu */}
         <AnimatePresence>
           {open && (
             <motion.div
@@ -205,16 +220,8 @@ export default function NavBar() {
               className={cn(
                 "absolute left-0 mt-3 w-48",
                 "bg-popover/95 backdrop-blur-xl",
-                "border border-border/50",
-                "rounded-xl shadow-lg",
-                "overflow-hidden",
-                "ring-1 ring-black/5"
+                "border border-border/50 rounded-xl shadow-lg overflow-hidden ring-1 ring-black/5"
               )}
-              style={{
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-              }}
-              role="menu"
             >
               {navLinks.map((link) => {
                 const Icon =
@@ -233,9 +240,7 @@ export default function NavBar() {
                       setOpen(false);
                     }}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 w-full text-left",
-                      "text-sm font-medium",
-                      "transition-colors duration-150",
+                      "flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium",
                       isActive
                         ? "bg-accent text-accent-foreground"
                         : "text-foreground hover:bg-accent/50 hover:text-accent-foreground"
@@ -263,73 +268,139 @@ export default function NavBar() {
       {/* Separator */}
       <div className="w-px h-6 bg-border" />
 
-      {/* Right socials + theme toggle */}
-      <div className="flex items-center gap-2">
-        {socialLinks.map(({ href, icon: Icon, label }) => (
-          <motion.a
-            key={href}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={{ scale: 1.1, y: -1 }}
+      {/* Right side: socials + theme toggle */}
+      <div className="flex items-center" ref={menuRef}>
+        {/* Desktop view */}
+        <div className="hidden sm:flex items-center gap-2">
+          {socialLinks.map(({ href, icon: Icon, label }) => (
+            <motion.a
+              key={href}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.1, y: -1 }}
+              whileTap={{ scale: 0.95 }}
+              className={cn(
+                "p-2.5 rounded-xl",
+                "text-muted-foreground hover:text-foreground",
+                "hover:bg-muted/60 transition-all duration-200",
+                "border border-transparent hover:border-border/30"
+              )}
+              aria-label={`Visit ${label}`}
+            >
+              <Icon size={20} />
+            </motion.a>
+          ))}
+
+          {/* Separator */}
+          <div className="w-px h-6 bg-border/60 mx-1" />
+
+          {/* Theme toggle */}
+          <motion.button
+            whileHover={{ rotate: 15, scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className={cn(
               "p-2.5 rounded-xl",
               "text-muted-foreground hover:text-foreground",
-              "hover:bg-muted/60",
-              "transition-all duration-200",
+              "hover:bg-muted/60 transition-all duration-200",
               "border border-transparent hover:border-border/30"
             )}
-            aria-label={`Visit ${label}`}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
-            <Icon size={20} />
-          </motion.a>
-        ))}
+            <AnimatePresence mode="wait">
+              {theme === "dark" ? (
+                <motion.div
+                  key="sun"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <IconSun size={20} className="text-amber-500" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="moon"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <IconMoon
+                    size={20}
+                    className="text-blue-600 dark:text-blue-400"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+        </div>
 
-        {/* Separator before theme toggle */}
-        <div className="w-px h-6 bg-border/60 mx-1" />
+        {/* Mobile view */}
+        <div className="sm:hidden relative">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setMenuOpen((p) => !p)}
+            className={cn(
+              "p-2.5 rounded-xl",
+              "text-muted-foreground hover:text-foreground",
+              "hover:bg-muted/60 transition-all duration-200",
+              "border border-transparent hover:border-border/30"
+            )}
+            aria-label="Open menu"
+          >
+            <IconDotsVertical size={20} />
+          </motion.button>
 
-        {/* Theme toggle */}
-        <motion.button
-          whileHover={{ rotate: 15, scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className={cn(
-            "p-2.5 rounded-xl",
-            "text-muted-foreground hover:text-foreground",
-            "hover:bg-muted/60",
-            "transition-all duration-200",
-            "border border-transparent hover:border-border/30"
-          )}
-          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-        >
-          <AnimatePresence mode="wait">
-            {theme === "dark" ? (
+          <AnimatePresence>
+            {menuOpen && (
               <motion.div
-                key="sun"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className={cn(
+                  "absolute right-0 mt-2 w-44",
+                  "bg-popover/95 backdrop-blur-xl",
+                  "border border-border/50 rounded-xl shadow-lg overflow-hidden ring-1 ring-black/5"
+                )}
               >
-                <IconSun size={20} className="text-amber-500" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="moon"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <IconMoon
-                  size={20}
-                  className="text-blue-600 dark:text-blue-400"
-                />
+                <div className="flex flex-col">
+                  {socialLinks.map(({ href, icon: Icon, label }) => (
+                    <a
+                      key={href}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-accent/50 transition"
+                    >
+                      <Icon size={18} className="text-muted-foreground" />
+                      {label}
+                    </a>
+                  ))}
+
+                  <button
+                    type="button"
+                    aria-label="Toggle theme"
+                    onClick={() => {
+                      setTheme(theme === "dark" ? "light" : "dark");
+                      setMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-accent/50 transition"
+                  >
+                    {theme === "dark" ? (
+                      <IconSun size={18} className="text-amber-500" />
+                    ) : (
+                      <IconMoon size={18} className="text-blue-600" />
+                    )}
+                    {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.button>
+        </div>
       </div>
     </motion.nav>
   );

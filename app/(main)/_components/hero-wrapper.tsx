@@ -12,7 +12,7 @@ export default function HeroWrapper({
   return (
     <section
       className={cn(
-        "min-h-dvh  ",
+        "min-h-dvh md:min-h-[80dvh]  ",
         theme === "dark" ? "dark-gradient" : "light-gradient"
       )}
     >

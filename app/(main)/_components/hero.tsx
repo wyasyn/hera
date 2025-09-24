@@ -235,17 +235,18 @@ export default function Hero() {
               duration: 0.8,
               ease: "easeOut",
             }}
-            className="text-4xl sm:text-5xl lg:text-6xl text-balance"
+            className="text-3xl sm:text-5xl lg:text-6xl text-balance leading-tight"
           >
-            I help{" "}
-            <motion.span
-              className="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent relative"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              startups & businesses
-            </motion.span>{" "}
-            build digital products without overwhelm.
+            <span className="block sm:inline">
+              <motion.span
+                className="bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 bg-clip-text text-transparent relative"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                Web, mobile & software
+              </motion.span>
+            </span>
+            <span className="block sm:inline"> made simple.</span>
           </motion.h1>
 
           {/* Enhanced Subtext */}
